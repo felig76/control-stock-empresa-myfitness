@@ -42,8 +42,6 @@ function mostrarStock(contenedor) {
 
 // Función para registrar una nueva compra
 function registrarCompra(contenedor) {
-    contenedor.innerHTML = ``;
-
     const botonSuelta = document.createElement('button');
     botonSuelta.textContent = 'Compra suelta';
     botonSuelta.className = 'opcionRegistroCompra';
@@ -57,46 +55,46 @@ function registrarCompra(contenedor) {
     contenedor.appendChild(botonSuelta);
     contenedor.appendChild(botonKit);
 
-    // Crear y añadir el formulario para la compra suelta
-    const formularioSuelta = document.createElement('form');
-    formularioSuelta.id = 'formSuelta';
-    formularioSuelta.innerHTML = `
-        <h3>Registrar Compra Suelta</h3>
-        <label for="productoSuelto">Producto:</label>
-        <input type="text" id="productoSuelto">
-        <label for="cantidadSuelta">Cantidad:</label>
-        <input type="number" id="cantidadSuelta">
-        <button type="submit">Registrar Compra Suelta</button>
-    `;
-    formularioSuelta.style.display = 'none'; // Ocultar inicialmente
-
-    // Crear y añadir el formulario para el kit
-    const formularioKit = document.createElement('form');
-    formularioKit.id = 'formKit';
-    formularioKit.innerHTML = `
-        <h3>Registrar Kit o Familia de Equipamiento</h3>
-        <label for="kit">Kit:</label>
-        <input type="text" id="kit">
-        <label for="cantidadKit">Cantidad:</label>
-        <input type="number" id="cantidadKit">
-        <button type="submit">Registrar Kit</button>
-    `;
-    formularioKit.style.display = 'none'; // Ocultar inicialmente
-
-    // Añadir formularios al contenedor
-    contenedor.appendChild(formularioSuelta);
-    contenedor.appendChild(formularioKit);
-
     // Añadir eventos a los botones
     botonSuelta.addEventListener('click', () => {
-        formularioSuelta.style.display = 'block';
-        formularioKit.style.display = 'none';
+        mostrarFormularioCompraSuelta(contenedor);
     });
 
     botonKit.addEventListener('click', () => {
-        formularioKit.style.display = 'block';
-        formularioSuelta.style.display = 'none';
+        mostrarFormularioCompraKit(contenedor);
     });
+}
+
+function mostrarFormularioCompraSuelta(contenedor){
+    formularioCompraSuelta.innerHTML = `<h3>Registrar Compra Suelta</h3>`
+    const formularioCompraSuelta = document.createElement('form');
+    formularioCompraSuelta.id = 'formCompraSuelta';
+    stock.forEach(producto => {
+        const etiquetaCampo = document.createElement('label');
+        etiquetaCampo.textContent = producto.nombre;
+        contenedor.appendChild(etiquetaCampo);
+
+        const selectorCantidad = document.createElement('input');
+        selectorCantidad.type = 'number';
+        selectorCantidad.min = 0;
+        selectorCantidad.id = `cantidad-${producto.nombre}`;
+        selectorCantidad.placeholder = `0`;
+        contenedor.appendChild(etiquetaCampo);
+    });
+
+    const botonSubmitSuelta = document.createElement('button');
+    botonSubmitSuelta.textContent = 'Registrar Compra';
+    formularioCompraSuelta.appendChild(botonSubmitSuelta);
+
+    const botonCancelarRegistro = document.createElement('button');
+    botonCancelarRegistro.textContent = 'Registrar Compra';
+    formularioCompraSuelta.appendChild(botonCancelarRegistro);
+
+    contenedor.appendChild(formularioCompraSuelta);
+}
+
+function mostrarFormularioCompraSuelta(contenedor){
+    
 }
 
 // Función para calcular e ingresar nuevo material
