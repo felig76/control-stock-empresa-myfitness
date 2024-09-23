@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     botones.forEach(boton => {
         boton.addEventListener('click', (evento) => {
-            mostrarNuevoContenedorOperacion(evento.target, document.getElementById('panelParaRealizarOperacion'));
+            mostrarNuevoContenedorOperacion(evento.target, document.getElementById('panelOperacion'));
         });
     });
 });
