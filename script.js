@@ -42,56 +42,74 @@ async function mostrarStock(contenedorPanelOperacion) {
 
 // Función para registrar una nueva compra
 function registrarCompra(contenedorPanelOperacion) {
-    const botonSuelta = document.createElement('button');
-    botonSuelta.textContent = 'Compra suelta';
-    botonSuelta.className = 'opcionRegistroCompra';
-    botonSuelta.id = 'compraSuelta';
+    contenedorPanelOperacion.innerHTML = `<h3>Elija el tipo de compra a realizar</h3>`;
+    const botonCompraSuelta = document.createElement('button');
+    botonCompraSuelta.textContent = 'Compra suelta';
+    botonCompraSuelta.className = 'opcionRegistroCompra';
+    botonCompraSuelta.id = 'botonCompraSuelta';
 
-    const botonKit = document.createElement('button');
-    botonKit.textContent = 'Compra de Kit o familia de equipamiento';
-    botonKit.className = 'opcionRegistroCompra';
-    botonKit.id = 'compraKit';
+    const botonCompraKit = document.createElement('button');
+    botonCompraKit.textContent = 'Compra de Kit o familia de equipamiento';
+    botonCompraKit.className = 'opcionRegistroCompra';
+    botonCompraKit.id = 'botonCompraKit';
 
-    contenedor.appendChild(botonSuelta);
-    contenedor.appendChild(botonKit);
+    contenedorPanelOperacion.appendChild(botonCompraSuelta);
+    contenedorPanelOperacion.appendChild(botonCompraKit);
 
-    // Añadir eventos a los botones
-    botonSuelta.addEventListener('click', () => {
-        mostrarFormularioCompraSuelta(contenedor);
+    botonCompraSuelta.addEventListener('click', () => {
+        mostrarFormularioCompraSuelta(contenedorPanelOperacion);
     });
-
-    botonKit.addEventListener('click', () => {
-        mostrarFormularioCompraKit(contenedor);
+    botonCompraKit.addEventListener('click', () => {
+        mostrarFormularioCompraKit(contenedorPanelOperacion);
     });
 }
 
-function mostrarFormularioCompraSuelta(contenedorPanelOperacion){
-    formularioCompraSuelta.innerHTML = `<h3>Registrar Compra Suelta</h3>`
+async function mostrarFormularioCompraSuelta(contenedorPanelOperacion) {
     const formularioCompraSuelta = document.createElement('form');
+    formularioCompraSuelta.innerHTML = `<h3>Registrar Compra Suelta</h3>`;
     formularioCompraSuelta.id = 'formCompraSuelta';
-    stock.forEach(producto => {
-        const etiquetaCampo = document.createElement('label');
-        etiquetaCampo.textContent = producto.nombre;
-        contenedor.appendChild(etiquetaCampo);
 
-        const selectorCantidad = document.createElement('input');
-        selectorCantidad.type = 'number';
-        selectorCantidad.min = 0;
-        selectorCantidad.id = `cantidad-${producto.nombre}`;
-        selectorCantidad.placeholder = `0`;
-        contenedor.appendChild(etiquetaCampo);
-    });
+    try {
+        const response = await fetch('obtenerStock.php');
+        const stock = await response.json();
 
-    const botonSubmitSuelta = document.createElement('button');
-    botonSubmitSuelta.textContent = 'Registrar Compra';
-    formularioCompraSuelta.appendChild(botonSubmitSuelta);
+        stock.forEach(producto => {
+            const etiquetaCampo = document.createElement('label');
+            etiquetaCampo.textContent = `${producto.nombre_producto} (${producto.cantidad_producto} disponibles)`;
+            etiquetaCampo.setAttribute('for', `cantidad-${producto.nombre_producto}`);
+            formularioCompraSuelta.appendChild(etiquetaCampo);
 
-    const botonCancelarRegistro = document.createElement('button');
-    botonCancelarRegistro.textContent = 'Registrar Compra';
-    formularioCompraSuelta.appendChild(botonCancelarRegistro);
+            const selectorCantidad = document.createElement('input');
+            selectorCantidad.type = 'number';
+            selectorCantidad.min = 0;
+            selectorCantidad.max = producto.cantidad_producto;
+            selectorCantidad.id = `${producto.nombre_producto}`;
+            selectorCantidad.placeholder = `0`;
+            formularioCompraSuelta.appendChild(selectorCantidad);
+        });
 
-    contenedor.appendChild(formularioCompraSuelta);
+        // Botón para enviar el formulario
+        const botonSubmitSuelta = document.createElement('button');
+        botonSubmitSuelta.type = 'submit'; // Cambiar a tipo submit para enviar el formulario
+        botonSubmitSuelta.textContent = 'Registrar Compra';
+        formularioCompraSuelta.appendChild(botonSubmitSuelta);
+
+        // Botón para cancelar
+        const botonCancelarRegistro = document.createElement('button');
+        botonCancelarRegistro.type = 'button'; // Tipo button para cancelar
+        botonCancelarRegistro.textContent = 'Cancelar';
+        botonCancelarRegistro.addEventListener('click', () => {
+            formularioCompraSuelta.reset(); // Reinicia el formulario
+        });
+        formularioCompraSuelta.appendChild(botonCancelarRegistro);
+
+        // Añadir el formulario al contenedor principal
+        contenedorPanelOperacion.appendChild(formularioCompraSuelta);
+    } catch (error) {
+        console.error('Error al obtener el stock:', error);
+    }
 }
+
 
 function mostrarFormularioCompraSuelta(){
     
