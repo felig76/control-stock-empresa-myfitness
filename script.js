@@ -1,25 +1,15 @@
-let stock = [
-    { "nombre": "Discos 1kg", "cantidad": 300 },
-    { "nombre": "Discos 2kg", "cantidad": 250 },
-    { "nombre": "Discos 5kg", "cantidad": 150 },
-    { "nombre": "Discos 10kg", "cantidad": 100 },
-    { "nombre": "Barras cortas", "cantidad": 50 },
-    { "nombre": "Barras largas", "cantidad": 40 },
-    { "nombre": "Mariposas para barra", "cantidad": 200 }
-]
-
 document.addEventListener('DOMContentLoaded', () => {
     const botones = document.querySelectorAll('.opcionOperacion');
 
     botones.forEach(boton => {
         boton.addEventListener('click', (evento) => {
-            mostrarNuevoContenedorOperacion(evento.target, document.getElementById('panelOperacion'));
+            mostrarNuevoContenedorOperacion(evento.target);
         });
     });
 });
 
-function mostrarNuevoContenedorOperacion(botonOrigen, contenedorPanelOperacion){
-    contenedorPanelOperacion.innerHTML = '';
+function mostrarNuevoContenedorOperacion(botonOrigen){
+    const contenedorPanelOperacion = document.getElementById('panelOperacion');
     const accionBoton = botonOrigen.id;
     if (accionBoton === 'verStock'){
         mostrarStock(contenedorPanelOperacion);
@@ -31,17 +21,27 @@ function mostrarNuevoContenedorOperacion(botonOrigen, contenedorPanelOperacion){
 }
 
 // Función para mostrar el stock
-function mostrarStock(contenedor) {
-    contenedor.innerHTML = `<h3>Consultar Stock</h3>`;
-    stock.forEach(producto => {
-        itemProductoStock = document.createElement('li')
-        itemProductoStock.textContent = `${producto.nombre}: ${producto.cantidad} en stock`;
-        contenedor.appendChild(itemProductoStock);
-    })
+async function mostrarStock(contenedorPanelOperacion) {
+    document.getElementById('panelOperacion').innerHTML = `<h3>Consultar Stock</h3>`;
+    
+    try {
+        // Realizar fetch para obtener los datos del stock desde el archivo PHP
+        const response = await fetch('obtenerStock.php');
+        const stock = await response.json(); // Convertir la respuesta a formato JSON
+
+        // Recorrer los productos obtenidos y agregarlos al contenedor
+        stock.forEach(producto => {
+            let itemProductoStock = document.createElement('li');
+            itemProductoStock.textContent = `${producto.nombre_producto}: ${producto.cantidad_producto} en stock`;
+            contenedorPanelOperacion.appendChild(itemProductoStock);
+        });
+    } catch (error) {
+        console.error('Error al obtener el stock:', error);
+    }
 }
 
 // Función para registrar una nueva compra
-function registrarCompra(contenedor) {
+function registrarCompra(contenedorPanelOperacion) {
     const botonSuelta = document.createElement('button');
     botonSuelta.textContent = 'Compra suelta';
     botonSuelta.className = 'opcionRegistroCompra';
@@ -65,7 +65,7 @@ function registrarCompra(contenedor) {
     });
 }
 
-function mostrarFormularioCompraSuelta(contenedor){
+function mostrarFormularioCompraSuelta(contenedorPanelOperacion){
     formularioCompraSuelta.innerHTML = `<h3>Registrar Compra Suelta</h3>`
     const formularioCompraSuelta = document.createElement('form');
     formularioCompraSuelta.id = 'formCompraSuelta';
@@ -93,22 +93,8 @@ function mostrarFormularioCompraSuelta(contenedor){
     contenedor.appendChild(formularioCompraSuelta);
 }
 
-function mostrarFormularioCompraSuelta(contenedor){
+function mostrarFormularioCompraSuelta(){
     
-}
-
-// Función para calcular e ingresar nuevo material
-function calcularIngresarMaterial(contenedor) {
-    contenedor.innerHTML = `
-        <h3>Ingresar Material</h3>
-        <form>
-            <label for="material">Material:</label>
-            <input type="text" id="material">
-            <label for="cantidad">Cantidad:</label>
-            <input type="number" id="cantidad">
-            <button type="submit">Ingresar Material</button>
-        </form>
-    `;
 }
 
 //funcion para cambiar el stock, ya sea para agregar en caso de que entre nuevo material o para quitar si se ha registrado una compra
