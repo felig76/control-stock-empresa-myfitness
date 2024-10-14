@@ -25,9 +25,14 @@ async function mostrarStock(contenedorPanelOperacion) {
     document.getElementById('panelOperacion').innerHTML = `<h3>Consultar Stock</h3>`;
     
     try {
-        // Realizar fetch para obtener los datos del stock desde el archivo PHP
         const response = await fetch('obtenerStock.php');
         const stock = await response.json(); // Convertir la respuesta a formato JSON
+
+        // Verifica si el stock tiene datos
+        if (stock.length === 0) {
+            contenedorPanelOperacion.innerHTML += `<p>No hay productos en stock.</p>`;
+            return;
+        }
 
         // Recorrer los productos obtenidos y agregarlos al contenedor
         stock.forEach(producto => {
@@ -37,12 +42,15 @@ async function mostrarStock(contenedorPanelOperacion) {
         });
     } catch (error) {
         console.error('Error al obtener el stock:', error);
+        contenedorPanelOperacion.innerHTML = `<p>Error al obtener el stock.</p>`;
     }
 }
+
 
 // Función para registrar una nueva compra
 function registrarCompra(contenedorPanelOperacion) {
     contenedorPanelOperacion.innerHTML = `<h3>Elija el tipo de compra a realizar</h3>`;
+    
     const botonCompraSuelta = document.createElement('button');
     botonCompraSuelta.textContent = 'Compra suelta';
     botonCompraSuelta.className = 'opcionRegistroCompra';
@@ -53,65 +61,78 @@ function registrarCompra(contenedorPanelOperacion) {
     botonCompraKit.className = 'opcionRegistroCompra';
     botonCompraKit.id = 'botonCompraKit';
 
+    const contenedorFormularioCompra = document.createElement('div');
+    contenedorFormularioCompra.id = 'contenedorFormularioCompra'; // Cambiar ID para evitar conflictos
+
     contenedorPanelOperacion.appendChild(botonCompraSuelta);
     contenedorPanelOperacion.appendChild(botonCompraKit);
+    contenedorPanelOperacion.appendChild(contenedorFormularioCompra);
 
     botonCompraSuelta.addEventListener('click', () => {
-        mostrarFormularioCompraSuelta(contenedorPanelOperacion);
-    });
+        console.log("Botón Compra Suelta clickeado");
+        mostrarFormularioCompraSuelta(contenedorFormularioCompra);
+    });    
     botonCompraKit.addEventListener('click', () => {
-        mostrarFormularioCompraKit(contenedorPanelOperacion);
+        console.log("Botón Compra Kit clickeado");
+        mostrarFormularioCompraKit(contenedorFormularioCompra);
     });
 }
 
-async function mostrarFormularioCompraSuelta(contenedorPanelOperacion) {
+function mostrarFormularioCompraSuelta(contenedorFormularioCompra) {
+    contenedorFormularioCompra.innerHTML = ''; // Limpiar el contenedor antes de agregar el formulario
+
     const formularioCompraSuelta = document.createElement('form');
     formularioCompraSuelta.innerHTML = `<h3>Registrar Compra Suelta</h3>`;
     formularioCompraSuelta.id = 'formCompraSuelta';
 
-    try {
-        const response = await fetch('obtenerStock.php');
-        const stock = await response.json();
+    fetch('obtenerStock.php')
+    .then(response => {
+        console.log('Respuesta recibida:', response); // Agregado
+        if (!response.ok) {
+            throw new Error('Error en la respuesta');
+        }
+        return response.json();
+    })
 
-        stock.forEach(producto => {
-            const etiquetaCampo = document.createElement('label');
-            etiquetaCampo.textContent = `${producto.nombre_producto} (${producto.cantidad_producto} disponibles)`;
-            etiquetaCampo.setAttribute('for', `cantidad-${producto.nombre_producto}`);
-            formularioCompraSuelta.appendChild(etiquetaCampo);
+        .then(stock => {
+            console.log("Stock obtenido:", stock); // Verifica si se obtienen datos
+            stock.forEach(producto => {
+                const etiquetaCampo = document.createElement('label');
+                etiquetaCampo.textContent = `${producto.nombre_producto} (${producto.cantidad_producto} disponibles)`;
+                etiquetaCampo.setAttribute('for', `cantidad-${producto.nombre_producto}`);
+                formularioCompraSuelta.appendChild(etiquetaCampo);
 
-            const selectorCantidad = document.createElement('input');
-            selectorCantidad.type = 'number';
-            selectorCantidad.min = 0;
-            selectorCantidad.max = producto.cantidad_producto;
-            selectorCantidad.id = `${producto.nombre_producto}`;
-            selectorCantidad.placeholder = `0`;
-            formularioCompraSuelta.appendChild(selectorCantidad);
+                const selectorCantidad = document.createElement('input');
+                selectorCantidad.type = 'number';
+                selectorCantidad.min = 0;
+                selectorCantidad.max = producto.cantidad_producto;
+                selectorCantidad.id = `cantidad-${producto.nombre_producto}`; // Cambiar ID
+                selectorCantidad.placeholder = `0`;
+                formularioCompraSuelta.appendChild(selectorCantidad);
+            });
+
+            // Botón para enviar el formulario
+            const botonSubmitSuelta = document.createElement('button');
+            botonSubmitSuelta.type = 'submit';
+            botonSubmitSuelta.textContent = 'Registrar Compra';
+            formularioCompraSuelta.appendChild(botonSubmitSuelta);
+
+            formularioCompraSuelta.addEventListener('submit', (event) => {
+                event.preventDefault();
+                console.log('Formulario enviado');
+                // Aquí puedes manejar el envío del formulario
+            });
+
+            contenedorFormularioCompra.appendChild(formularioCompraSuelta);
+        })
+        .catch(error => {
+            console.error('Error al obtener el stock:', error);
         });
-
-        // Botón para enviar el formulario
-        const botonSubmitSuelta = document.createElement('button');
-        botonSubmitSuelta.type = 'submit'; // Cambiar a tipo submit para enviar el formulario
-        botonSubmitSuelta.textContent = 'Registrar Compra';
-        formularioCompraSuelta.appendChild(botonSubmitSuelta);
-
-        // Botón para cancelar
-        const botonCancelarRegistro = document.createElement('button');
-        botonCancelarRegistro.type = 'button'; // Tipo button para cancelar
-        botonCancelarRegistro.textContent = 'Cancelar';
-        botonCancelarRegistro.addEventListener('click', () => {
-            formularioCompraSuelta.reset(); // Reinicia el formulario
-        });
-        formularioCompraSuelta.appendChild(botonCancelarRegistro);
-
-        // Añadir el formulario al contenedor principal
-        contenedorPanelOperacion.appendChild(formularioCompraSuelta);
-    } catch (error) {
-        console.error('Error al obtener el stock:', error);
-    }
 }
 
 
-function mostrarFormularioCompraSuelta(){
+
+function mostrarFormularioCompraSuelta(contenedorFormulario){
     
 }
 
