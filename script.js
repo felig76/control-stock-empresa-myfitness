@@ -74,12 +74,12 @@ function registrarCompra(contenedorPanelOperacion) {
     });    
     botonCompraKit.addEventListener('click', () => {
         console.log("Botón Compra Kit clickeado");
-        mostrarFormularioCompraKit(contenedorFormularioCompra);
+        mostrarOpciónCompraKit(contenedorFormularioCompra);
     });
 }
 
 function mostrarFormularioCompraSuelta(contenedorFormularioCompra) {
-    contenedorFormularioCompra.innerHTML = ''; // Limpiar el contenedor antes de agregar el formulario
+    contenedorFormularioCompra.innerHTML = '';
 
     const formularioCompraSuelta = document.createElement('form');
     formularioCompraSuelta.innerHTML = `<h3>Registrar Compra Suelta</h3>`;
@@ -93,46 +93,83 @@ function mostrarFormularioCompraSuelta(contenedorFormularioCompra) {
         }
         return response.json();
     })
+    .then(stock => {
+        console.log("Stock obtenido:", stock); // Verifica si se obtienen datos
 
-        .then(stock => {
-            console.log("Stock obtenido:", stock); // Verifica si se obtienen datos
-            stock.forEach(producto => {
-                const etiquetaCampo = document.createElement('label');
-                etiquetaCampo.textContent = `${producto.nombre_producto} (${producto.cantidad_producto} disponibles)`;
-                etiquetaCampo.setAttribute('for', `cantidad-${producto.nombre_producto}`);
-                formularioCompraSuelta.appendChild(etiquetaCampo);
+        const listaProductos = document.createElement('ul'); // Crear lista desordenada
 
-                const selectorCantidad = document.createElement('input');
-                selectorCantidad.type = 'number';
-                selectorCantidad.min = 0;
-                selectorCantidad.max = producto.cantidad_producto;
-                selectorCantidad.id = `cantidad-${producto.nombre_producto}`; // Cambiar ID
-                selectorCantidad.placeholder = `0`;
-                formularioCompraSuelta.appendChild(selectorCantidad);
-            });
+        stock.forEach(producto => {
+            const elementoLista = document.createElement('li');
+            const etiquetaCampo = document.createElement('label');
+            etiquetaCampo.textContent = `${producto.nombre_producto} (${producto.cantidad_producto} disponibles)`;
+            etiquetaCampo.setAttribute('for', `cantidad-${producto.nombre_producto}`);
+            elementoLista.appendChild(etiquetaCampo);
 
-            // Botón para enviar el formulario
-            const botonSubmitSuelta = document.createElement('button');
-            botonSubmitSuelta.type = 'submit';
-            botonSubmitSuelta.textContent = 'Registrar Compra';
-            formularioCompraSuelta.appendChild(botonSubmitSuelta);
+            const selectorCantidad = document.createElement('input');
+            selectorCantidad.type = 'number';
+            selectorCantidad.min = 0;
+            selectorCantidad.max = producto.cantidad_producto;
+            selectorCantidad.id = `cantidad-${producto.nombre_producto}`;
+            selectorCantidad.placeholder = `0`;
+            elementoLista.appendChild(selectorCantidad);
 
-            formularioCompraSuelta.addEventListener('submit', (event) => {
-                event.preventDefault();
-                console.log('Formulario enviado');
-                // Aquí puedes manejar el envío del formulario
-            });
-
-            contenedorFormularioCompra.appendChild(formularioCompraSuelta);
-        })
-        .catch(error => {
-            console.error('Error al obtener el stock:', error);
+            listaProductos.appendChild(elementoLista);
         });
+
+        formularioCompraSuelta.appendChild(listaProductos); // Agregar la lista al formulario
+
+        const botonSubmitSuelta = document.createElement('button');
+        botonSubmitSuelta.type = 'submit';
+        botonSubmitSuelta.textContent = 'Registrar Compra';
+        formularioCompraSuelta.appendChild(botonSubmitSuelta);
+
+        formularioCompraSuelta.addEventListener('submit', (event) => {
+            event.preventDefault();
+            console.log('Formulario enviado');
+
+            // Obtener los datos del formulario
+            const datosFormulario = Array.from(formularioCompraSuelta.querySelectorAll('input'))
+                .filter(input => input.value)
+                .map(input => {
+                    return {
+                        nombre_producto: input.id.replace('cantidad-', ''),
+                        cantidad_producto: input.value
+                    };
+                });
+
+            // Enviar datos al servidor
+            fetch('actualizarStock.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(datosFormulario)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta');
+                }
+                return response.text();
+            })
+            .then(data => {
+                location.reload();
+            })
+            .catch(error => {
+                console.error('Error al actualizar el stock:', error);
+            });
+        });
+
+
+
+        contenedorFormularioCompra.appendChild(formularioCompraSuelta);
+    })
+    .catch(error => {
+        console.error('Error al obtener el stock:', error);
+    });
 }
 
 
-
-function mostrarFormularioCompraSuelta(contenedorFormulario){
+function mostrarOpciónCompraKit(contenedorFormularioCompra){
     
 }
 
