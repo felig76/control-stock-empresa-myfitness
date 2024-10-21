@@ -20,3 +20,7 @@ INSERT INTO stock (nombre_producto, cantidad_producto) VALUES
 ('Barras cortas', 50),
 ('Barras largas', 40),
 ('Mariposas para barra', 200);
+
+
+-- Stored procedure
+-- SELECT * FROM stock

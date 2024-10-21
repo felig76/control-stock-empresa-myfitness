@@ -27,4 +27,6 @@ if ($result) {
 }
 
 echo json_encode($stock);
+
 $conn->close();
+?>

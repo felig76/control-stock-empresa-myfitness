@@ -48,7 +48,7 @@ main {
 #panelOperacion {
     text-align: center;
     padding: 3em;
-    height: 15rem;
+    min-height: 25rem;
     background-color: var(--gris);
 }
 #botonesOperaciones {
