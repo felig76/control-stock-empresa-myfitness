@@ -22,7 +22,7 @@ function mostrarNuevoContenedorOperacion(botonOrigen){
 
 // Función para mostrar el stock
 async function mostrarStock(contenedorPanelOperacion) {
-    document.getElementById('panelOperacion').innerHTML = `<h3>Consultar Stock</h3>`;
+    contenedorPanelOperacion.innerHTML = `<h3>Consultar Stock</h3>`;
     
     try {
         const response = await fetch('obtenerStock.php');
@@ -169,8 +169,82 @@ function mostrarFormularioCompraSuelta(contenedorFormularioCompra) {
 }
 
 
-function mostrarOpciónCompraKit(contenedorFormularioCompra){
-    
+function mostrarOpciónCompraKit(contenedorFormularioCompra) {
+    contenedorFormularioCompra.innerHTML = '';
+
+    const kits = [
+        { nombre: 'Kit de Fuerza Básico', productos: { 'Discos 1kg': 2, 'Barras cortas': 1 } },
+        { nombre: 'Kit de Fuerza Avanzado', productos: { 'Discos 5kg': 2, 'Discos 10kg': 2, 'Barras largas': 1 } },
+        { nombre: 'Kit de Musculación', productos: { 'Discos 2kg': 2, 'Discos 5kg': 2, 'Barras cortas': 1, 'Mariposas para barra': 2 } },
+        { nombre: 'Kit Completo de Fuerza', productos: { 'Discos 1kg': 2, 'Discos 2kg': 2, 'Discos 5kg': 2, 'Discos 10kg': 2, 'Barras cortas': 1, 'Barras largas': 1, 'Mariposas para barra': 4 } }
+    ];
+
+    fetch('obtenerStock.php')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error en la respuesta');
+        }
+        return response.json();
+    })
+    .then(stock => {
+        kits.forEach(kit => {
+            const contenedorKit = document.createElement('div');
+            contenedorKit.className = 'kit';
+
+            const nombreKit = document.createElement('h3');
+            nombreKit.textContent = kit.nombre;
+            contenedorKit.appendChild(nombreKit);
+
+            const descripcionKit = document.createElement('p');
+            descripcionKit.textContent = 'Contiene: ' + Object.entries(kit.productos)
+                .map(([nombre, cantidad]) => `${nombre} (${cantidad})`).join(', ');
+            contenedorKit.appendChild(descripcionKit);
+
+            const hayStockSuficiente = Object.entries(kit.productos).every(([nombre, cantidad]) => {
+                const producto = stock.find(p => p.nombre_producto === nombre);
+                return producto && producto.cantidad_producto >= cantidad;
+            });
+
+            if (hayStockSuficiente) {
+                contenedorKit.addEventListener('click', () => {
+                    const cantidadesActualizadas = Object.entries(kit.productos).map(([nombre, cantidad]) => ({
+                        nombre_producto: nombre,
+                        cantidad: -cantidad
+                    }));
+
+                    // Aquí envías los datos específicos del kit al servidor
+                    fetch('actualizarStock.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(cantidadesActualizadas)
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error en la respuesta');
+                        }
+                        return response.text();
+                    })
+                    .then(data => {
+                        console.log('Stock actualizado:', data);
+                        location.reload();
+                    })
+                    .catch(error => {
+                        console.error('Error al actualizar el stock:', error);
+                    });
+                });
+            } else {
+                contenedorKit.className += ' no-disponible'; // Añadir clase para estilo de no disponible
+            }
+
+            contenedorFormularioCompra.appendChild(contenedorKit);
+        });
+    })
+    .catch(error => {
+        console.error('Error al obtener el stock:', error);
+    });
 }
 
-//funcion para cambiar el stock, ya sea para agregar en caso de que entre nuevo material o para quitar si se ha registrado una compra
+function calcularIngresarMaterial(contenedorPanelOperacion){
+    contenedorPanelOperacion.innerHTML = `<h3>Calculo de material e ingreso de stock</h3>`;
+
+}
