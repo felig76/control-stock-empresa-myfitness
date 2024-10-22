@@ -74,7 +74,7 @@ function registrarCompra(contenedorPanelOperacion) {
     });    
     botonCompraKit.addEventListener('click', () => {
         console.log("Botón Compra Kit clickeado");
-        mostrarOpciónCompraKit(contenedorFormularioCompra);
+        mostrarOpcionCompraKit(contenedorFormularioCompra);
     });
 }
 
@@ -169,7 +169,7 @@ function mostrarFormularioCompraSuelta(contenedorFormularioCompra) {
 }
 
 
-function mostrarOpciónCompraKit(contenedorFormularioCompra) {
+function mostrarOpcionCompraKit(contenedorFormularioCompra) {
     contenedorFormularioCompra.innerHTML = '';
 
     const kits = [

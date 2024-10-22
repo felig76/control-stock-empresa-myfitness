@@ -22,5 +22,5 @@ INSERT INTO stock (nombre_producto, cantidad_producto) VALUES
 ('Mariposas para barra', 200);
 
 
--- Stored procedure
+-- Stored procedure ObtenerStock
 -- SELECT * FROM stock
