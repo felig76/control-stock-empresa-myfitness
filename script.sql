@@ -19,7 +19,8 @@ INSERT INTO stock (nombre_producto, cantidad_producto) VALUES
 ('Discos 10kg', 100),
 ('Barras cortas', 50),
 ('Barras largas', 40),
-('Mariposas para barra', 200);
+('Mariposas para barra', 200),
+("Hierro", 1000);
 
 
 -- Stored procedure ObtenerStock

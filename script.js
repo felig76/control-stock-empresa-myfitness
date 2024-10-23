@@ -133,7 +133,7 @@ function mostrarFormularioCompraSuelta(contenedorFormularioCompra) {
                 .map(input => {
                     return {
                         nombre_producto: input.id.replace('cantidad-', ''),
-                        cantidad_producto: input.value
+                        cantidad_producto: -input.value
                     };
                 });
 
@@ -209,7 +209,7 @@ function mostrarOpcionCompraKit(contenedorFormularioCompra) {
                 contenedorKit.addEventListener('click', () => {
                     const cantidadesActualizadas = Object.entries(kit.productos).map(([nombre, cantidad]) => ({
                         nombre_producto: nombre,
-                        cantidad: -cantidad
+                        cantidad_producto: -cantidad
                     }));
 
                     // Aquí envías los datos específicos del kit al servidor
