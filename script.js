@@ -152,6 +152,7 @@ function mostrarFormularioCompraSuelta(contenedorFormularioCompra) {
                 return response.text();
             })
             .then(data => {
+                alert('Se ha registrado la compra');
                 location.reload();
             })
             .catch(error => {
@@ -225,7 +226,7 @@ function mostrarOpcionCompraKit(contenedorFormularioCompra) {
                         return response.text();
                     })
                     .then(data => {
-                        console.log('Stock actualizado:', data);
+                        alert('Se ha actualizado el stock');
                         location.reload();
                     })
                     .catch(error => {
@@ -244,7 +245,140 @@ function mostrarOpcionCompraKit(contenedorFormularioCompra) {
     });
 }
 
+
 function calcularIngresarMaterial(contenedorPanelOperacion){
     contenedorPanelOperacion.innerHTML = `<h3>Calculo de material e ingreso de stock</h3>`;
 
+    const contenedorFormularios = document.createElement('div');
+    contenedorFormularios.id = 'contenedorFormulariosIngresoStock';
+    contenedorFormularios.style.display = 'grid';
+
+    const formularioIngresoBarras = document.createElement('div');
+    formularioIngresoBarras.innerHTML = `
+        <form id="formularioIngresoBarras">
+            <label for="cantidad-barras-cortas">Barras cortas (7kg por barra):</label>
+            <input type="number" id="cantidad-barras-cortas" name="barras-cortas" min="0">
+            <br>
+            <label for="cantidad-barras-largas">Barras largas (10kg por barra):</label>
+            <input type="number" id="cantidad-barras-largas" name="barras-largas" min="0">
+            <br>
+            <button type="submit">Agregar al stock</button>
+            <p id="error-mensaje" style="color: red; display: none;"></p>
+        </form>
+    `;
+
+    formularioIngresoBarras.addEventListener('submit', (event) => {
+        event.preventDefault(); // Prevenir la recarga de la página
+
+        // Obtener los datos del formulario
+        const barrasCortas = parseInt(document.getElementById('cantidad-barras-cortas').value) || 0;
+        const barrasLargas = parseInt(document.getElementById('cantidad-barras-largas').value) || 0;
+        const hierroNecesario = (barrasCortas * 7) + (barrasLargas * 10); // Calcular el hierro necesario
+
+        // Fetch para obtener el stock de hierro disponible en tiempo real
+        fetch('obtenerStock.php')
+            .then(response => response.json())
+            .then(data => {
+                const hierro = data.find(item => item.nombre_producto === 'Hierro');
+                const cantidadHierro = hierro ? hierro.cantidad_producto : 0;
+
+                // Comprobar si hay suficiente hierro disponible
+                if (hierroNecesario > cantidadHierro) {
+                    alert('No hay hierro suficiente en stock para la producción');
+                } else {
+                    const datosFormulario = [
+                        { nombre_producto: 'Barras cortas', cantidad_producto: barrasCortas },
+                        { nombre_producto: 'Barras largas', cantidad_producto: barrasLargas },
+                        { nombre_producto: 'Hierro', cantidad_producto: -hierroNecesario }
+                    ];
+
+                    fetch('actualizarStock.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(datosFormulario)
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error al actualizar el stock');
+                        }
+                        return response.text();
+                    })
+                    .then(data => {
+                        alert('Se ha actualizado el stock');
+                    })
+                    .catch(error => {
+                        console.error('Error al actualizar el stock:', error);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error al obtener el stock:', error);
+            });
+    });
+
+    const listaIngresoStock = document.createElement('ul');
+    listaIngresoStock.id = 'listaIngresoStock';
+    listaIngresoStock.innerHTML = '<h3>Agregar otros elementos al stock</h3>';
+
+    const productos = ['Discos 1kg', 'Discos 2kg', 'Discos 5kg', 'Discos 10kg', 'Mariposas para barra', 'Hierro'];
+    
+    productos.forEach(producto => {
+        const itemProducto = document.createElement('li');
+        const etiquetaProducto = document.createElement('label');
+        etiquetaProducto.textContent = `Agregar ${producto}`;
+        const inputCantidad = document.createElement('input');
+        inputCantidad.type = 'number';
+        inputCantidad.min = 0;
+        inputCantidad.placeholder = 'Cantidad a ingresar';
+        inputCantidad.id = `cantidad-${producto}`;
+
+        itemProducto.appendChild(etiquetaProducto);
+        itemProducto.appendChild(inputCantidad);
+        listaIngresoStock.appendChild(itemProducto);
+    });
+
+    // Botón para enviar el stock actualizado
+    const botonAgregarStock = document.createElement('button');
+    botonAgregarStock.textContent = 'Agregar al stock';
+    botonAgregarStock.addEventListener('click', () => {
+        const datosStock = productos.map(producto => {
+            const cantidad = document.getElementById(`cantidad-${producto}`).value;
+            return {
+                nombre_producto: producto,
+                cantidad_producto: parseInt(cantidad) || 0
+            };
+        }).filter(item => item.cantidad_producto > 0); // Filtrar los productos que tienen cantidad válida
+
+        if (datosStock.length > 0) {
+            fetch('actualizarStock.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datosStock)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta');
+                }
+                return response.text();
+            })
+            .then(data => {
+                alert('Se ha actualizado el stock');
+            })
+            .catch(error => {
+                console.error('Error al actualizar el stock:', error);
+            });
+        } else {
+            alert('Ingrese al menos una cantidad válida para los productos.');
+        }
+    });
+
+    listaIngresoStock.appendChild(botonAgregarStock);
+
+    // Agregar los formularios al contenedor principal
+    contenedorFormularios.appendChild(formularioIngresoBarras);
+    contenedorFormularios.appendChild(listaIngresoStock);
+
+    contenedorPanelOperacion.appendChild(contenedorFormularios);
 }
