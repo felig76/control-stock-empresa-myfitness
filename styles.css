@@ -16,6 +16,19 @@ body {
     padding: 0;
 }
 
+body::-webkit-scrollbar {
+    width: 10px;               /* width of the entire scrollbar */
+  }
+  
+body::-webkit-scrollbar-track {
+    background: var(--negro)        /* color of the tracking area */
+}
+
+body::-webkit-scrollbar-thumb {
+    background-color: var(--celeste);    /* color of the scroll thumb */
+    border-radius: 20px;       /* roundness of the scroll thumb */
+}
+
 h1{
     font-size: 3em;
 }
@@ -44,6 +57,7 @@ main {
 }
 
 #panelOperacion {
+    list-style: none;
     text-align: center;
     padding: 3em;
     min-height: 25rem;
@@ -87,29 +101,28 @@ main {
 
 #formCompraSuelta {
     grid-column: 1 / 3;
-    list-style: none;
 }
 #formCompraSuelta ul {
     list-style: none;
 }
 
+#listaIngresoStock {
+    list-style: none;
+}
+
 .kit {
+    text-align: start;
     background-color: orange;
     color: black;
     cursor: pointer;
-    padding: 2rem;
+    padding: 1.5rem;
     min-height: 3.5rem;
-    width: 30rem;
+    max-width: 25rem;
     border-radius: 1rem;
-    margin: 1rem;
+    margin: 0.75rem;
 }
 
 .kit.no-disponible {
-    background-color: rgb(163, 154, 141);
+    background-color: rgb(180, 180, 180);
     cursor: not-allowed;
-}
-
-footer {
-    background-color: black;
-    padding: 2em;
 }
